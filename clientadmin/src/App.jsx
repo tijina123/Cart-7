@@ -22,6 +22,7 @@ import Orders from "./pages/admin/Orders";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import LoginProtectedRoute from "./components/protected-route/LoginProtectedRoute";
 
 function App() {
 
@@ -29,9 +30,11 @@ function App() {
   return (
     <>
       <Routes>
-
+        
+      <Route element={<LoginProtectedRoute />}>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        </Route>
 
         <Route element={<AdminProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />

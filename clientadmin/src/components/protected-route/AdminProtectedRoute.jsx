@@ -9,7 +9,9 @@ const AdminProtectedRoute = () => {
   console.log(auth,"====auth====");
   
 
-  if (!token || (auth.role !== "admin" && auth.role !== "Super Admin")) {
+  if (!token || (auth.role == !"admin" && auth.role == !"Super Admin")) {
+    console.log("Not authorized");
+    
       return <Navigate to="/login" />;
   }
 

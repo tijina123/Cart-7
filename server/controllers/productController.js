@@ -80,7 +80,7 @@ const getProducts = async (req, res) => {
 
 
       // Fetch all products
-          const products = await Product.find()
+          const products = await Product.find().populate("category")
             
      
 
@@ -439,9 +439,12 @@ const updateProduct = async (req, res) => {
 
         const { id } = req.params;
 
-        const userId = req.userId;
+        // const userId = req.userId;
 
-        const { name, description, price, category, stock, images } = req.body;
+        const { name, description, sale_price, product_price, category, stock, images } = req.body;
+
+        console.log("Update Product Body:", req.body);
+        console.log("Update Product Params:", req.params);
 
         // Handle missing id in params
         if (!id) {
@@ -456,7 +459,8 @@ const updateProduct = async (req, res) => {
         // Update fields if provided
         product.name = name || product.name;
         product.description = description || product.description;
-        product.price = price || product.price;
+        product.product_price = product_price || product.product_price;
+        product.sale_price = sale_price || product.sale_price;
         product.category = category || product.category;
         product.stock = stock !== undefined ? stock : product.stock;
         product.images = images || product.images;
@@ -470,16 +474,17 @@ const updateProduct = async (req, res) => {
             });
         }
 
-        const products = await getAllProducts(req, res);
-        if (!Array.isArray(products)) return; // Prevent further execution if an error response is already sent
+        // const products = await getAllProducts(req, res);
+        // if (!Array.isArray(products)) return; // Prevent further execution if an error response is already sent
 
 
-        res.json({
+        res.status(200).json({
             success: true,
             message: "Product updated successfully!",
-            products,
+            // products,
         });
     } catch (error) {
+        console.log("Error updating product:", error);
         res.status(500).json({
             success: false,
             message: "An error occurred while updating the product.",
@@ -565,15 +570,15 @@ const toggleProductStatus = async (req, res) => {
       product.isActive = !product.isActive; // Toggle isActive
       await product.save(); // Save the updated product
   
-      const products = await getAllProducts(res);
-      if (!Array.isArray(products)) return;
+    //   const products = await getAllProducts(res);
+    //   if (!Array.isArray(products)) return;
   
       res.status(200).json({
         success: true,
         message: `Product ${
           product.isActive ? "unblocked" : "blocked"
         } successfully.`,
-        product: products,
+        // product: products,
       });
     } catch (error) {
       console.error("Error toggling product status:", error);

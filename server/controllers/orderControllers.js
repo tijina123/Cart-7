@@ -3,13 +3,12 @@ const mongoose = require("mongoose");
 
 const { User } = require("../models/userModel.js");
 const { Order } = require("../models/orderModel.js");
-const razorpay = require("../utils/razorpay.js"); // Import Razorpay instance
-//temp
-const { getAuthToken } = require("../utils/shiprocketToken.js");
-const SHIPROCKET_API_URL = "https://apiv2.shiprocket.in/v1/external"; // Ensure this is in your .env
+const { Product } = require("../models/productModel.js");
+const { Address } = require("../models/addressModel");
 
-// ****************************************
-// Helper function to get last 7 days' dates
+const razorpay = require("../utils/razorpay.js"); // Import Razorpay instance
+
+
 const getLast7Days = () => {
   const dates = [];
   for (let i = 6; i >= 0; i--) {
@@ -21,9 +20,86 @@ const getLast7Days = () => {
 };
 // ***********************************
 
+const salesByCategory = async (req, res) => {
+  try {
+      const salesByCategory = await Order.aggregate([
+          { $unwind: "$orderItems" }, // Flatten order items
+          {
+              $lookup: {
+                  from: "products", // Match with Product collection
+                  localField: "orderItems.product",
+                  foreignField: "_id",
+                  as: "productDetails",
+              },
+          },
+          { $unwind: "$productDetails" },
+          {
+              $lookup: {
+                  from: "categories", // Match with Category collection
+                  localField: "productDetails.category",
+                  foreignField: "_id",
+                  as: "categoryDetails",
+              },
+          },
+          { $unwind: "$categoryDetails" },
+          {
+              $group: {
+                  _id: "$categoryDetails.name", // Group by category name
+                  totalSales: { $sum: "$orderItems.quantity" }, // Sum quantity sold
+              },
+          },
+          { $sort: { totalSales: -1 } }, // Sort by highest sales
+      ]);
+
+      // Format response
+      const labels = salesByCategory.map((item) => item._id);
+      const data = salesByCategory.map((item) => item.totalSales);
+console.log(labels,"===labels");
+console.log(data,"==data");
+
+      res.json({ labels, data });
+  } catch (error) {
+      console.error("Error fetching sales by category:", error);
+      res.status(500).json({ error: "Server error" });
+  }
+};
+
+const orderForGraph = async (req, res) => {
+  try {
+      const last7Days = getLast7Days();
+      const orders = await Order.aggregate([
+          {
+              $match: {
+                  createdAt: { $gte: new Date(last7Days[0] + "T00:00:00.000Z") },
+              },
+          },
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                  count: { $sum: 1 },
+              },
+          },
+      ]);
+
+      // Convert MongoDB response into an object { "2025-03-21": 5, ... }
+      const orderMap = {};
+      orders.forEach((order) => {
+          orderMap[order._id] = order.count;
+      });
+
+      // Map to last 7 days format
+      const data = last7Days.map((date) => orderMap[date] || 0);
+
+      res.json({ labels: last7Days, data });
+  } catch (error) {
+      res.status(500).json({ error: "Server error" });
+  }
+};
+
 // ✅ Check cart availability using aggregation
 const isproductAvailabe = async (req, res) => {
   try {
+
     const userId = req.userId;
 
     // Handle missing userId in params
@@ -60,6 +136,7 @@ const isproductAvailabe = async (req, res) => {
       },
     ]);
 
+
     if (userCart.length > 0) {
       return res.status(400).json({
         success: false,
@@ -68,28 +145,25 @@ const isproductAvailabe = async (req, res) => {
       });
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "All products are available" });
+    res.status(200).json({ success: true, message: "All products are available" });
+
   } catch (error) {
-   
+    console.log(error);
 
     res.status(500).json({ message: "Server error", error });
   }
-};
+}
 
+// ✅
 const getAllOrder = async (req, res) => {
   try {
     const userId = req.userId;
 
     const orders = await Order.find()
-      .populate("user", "name phone") // Populate user fields (adjust as needed)
-      .populate("orderItems.product", "name sale_price images"); // Populate product fields
-
-   
-
+    .populate("user", "name phone") // Populate user fields (adjust as needed)
+    .populate("orderItems.product", "name sale_price images"); // Populate product fields
     // Validation: Check if orders exist
-    if (!orders) {
+    if (!orders || orders.length === 0) {
       return res.status(400).json({
         success: false,
         message: "No orders found. Please place an order first.",
@@ -99,7 +173,7 @@ const getAllOrder = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Orders retrieved successfully.",
-      orders,
+      orders
     });
   } catch (error) {
     res.status(500).json({
@@ -110,234 +184,54 @@ const getAllOrder = async (req, res) => {
   }
 };
 
-//🆕 Create Order and Push to Shiprocket
-const createOrder = async (req, res) => {
-  // const validPaymentMethods = ["COD", "Credit Card", "Debit Card", "Net Banking", "UPI", "Wallet"];
-
-  try {
-    const userId = req.userId;
-
-    const {
-      orderItems,
-      shippingAddress,
-      paymentMethod,
-      currency = "INR",
-    } = req.body;
-
-
-
-    // Validate request data
-    if (
-      Object.keys(orderItems).length === 0||
-      Object.keys(shippingAddress).length === 0 ||
-      !paymentMethod 
-    ) {
-      return res.status(400).json({ message: "Invalid order data" });
-    }
-
-
-    //  return;
-
-    // if (!mongoose.Types.ObjectId.isValid(userId)) {
-    //   return res.status(400).json({ message: "Invalid user ID." });
-    // }
-
-    //calculate Totalprice
-    let totalPrice = orderItems.product.sale_price * orderItems.quantity;
-
-    // Step 1: Create a new order in MongoDB
-    const newOrder = await Order.create({
-      user: userId,
-      orderItems: {
-        product: orderItems.product._id,
-        quantity: orderItems.quantity,
-      },
-      shippingAddress: {
-        fullName: shippingAddress?.fullName,
-        phone: shippingAddress?.phone,
-        street: shippingAddress?.street,
-        city: shippingAddress?.city,
-        state: shippingAddress?.state,
-        zip: shippingAddress?.zip,
-        country: shippingAddress?.country,
-      },
-      paymentMethod,
-      totalPrice,
-      paymentStatus: "Pending",
-      deliveryStatus: "Pending",
-    });
-
-    if (!newOrder) {
-      res
-        .status(500)
-        .json({ message: "Order creation failed. Please try again later" });
-    }
-
-    let razorpayOrder = null;
-
-    // Step 2: Handle Payment
-    if (paymentMethod !== "COD") {
-      const options = {
-        amount: totalPrice * 100, // Convert to paise
-        currency,
-        receipt: `receipt_${newOrder._id}`,
-      };
-
-      razorpayOrder = await razorpay.orders.create(options);
-      if (!razorpayOrder) {
-        return res
-          .status(500)
-          .json({ message: "Razorpay order creation failed" });
-      }
-
-      newOrder.razorpay_order_id = razorpayOrder.id;
-      await newOrder.save();
-    
-    }
-
-    res.status(201).json({
-      success: true,
-      paymentMethod,
-      message: "Order created successfully",
-      order: newOrder,
-      razorpayOrder: razorpayOrder ? razorpayOrder : null,
-    });
-  } catch (error) {
-
-    res.status(500).json({ message: "Order creation failed" });
-  }
-};
-
+// ✅
 const getAllOrdersByUser = async (req, res) => {
   try {
-  
-      const  userId = req.userId;
-      // Handle missing orderId in params
-      if (!userId) {
-        return res.status(400).json({ message: "User id is required" });
-      }
 
-      if (!userId) {
-          return res.status(400).json({
-              success: false,
-              message: "User ID is required.",
-          });
-      }
+    const userId = req.userId; // Assuming userId is extracted from auth middleware
 
-      const orders = await Order.find({ user: userId }).populate("orderItems.product", "name sale_price images");;
-      
+    // Handle missing orderId in params
+    if (!userId) {
+      return res.status(400).json({ message: "User id is required" });
+    }
 
-      // Validation: Check if the user has any orders
-      if (!orders) {
-          return res.status(404).json({
-              success: false,
-              message: "No orders found for this user.",
-          });
-      }
-
-      res.status(200).json({
-          success: true,
-          message: "Orders retrieved successfully.",
-          orders
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required.",
       });
+    }
+
+    const orders = await Order.find({ user: userId });
+
+    // Validation: Check if the user has any orders
+    if (!orders) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this user.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Orders retrieved successfully.",
+      orders
+    });
   } catch (error) {
-      res.status(500).json({
-          success: false,
-          message: "An error occurred while retrieving the orders.",
-          error: error.message,
-      });
-  }
-};
-
-// API to get order count for the last 7 days
-// router.get("/weekly-orders", async (req, res) => {
-const orderForGraph = async (req, res) => {
-  try {
-      const last7Days = getLast7Days();
-      const orders = await Order.aggregate([
-          {
-              $match: {
-                  createdAt: { $gte: new Date(last7Days[0] + "T00:00:00.000Z") },
-              },
-          },
-          {
-              $group: {
-                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                  count: { $sum: 1 },
-              },
-          },
-      ]);
-
-      // Convert MongoDB response into an object { "2025-03-21": 5, ... }
-      const orderMap = {};
-      orders.forEach((order) => {
-          orderMap[order._id] = order.count;
-      });
-
-      // Map to last 7 days format
-      const data = last7Days.map((date) => orderMap[date] || 0);
-
-      res.json({ labels: last7Days, data });
-  } catch (error) {
-      res.status(500).json({ error: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the orders.",
+      error: error.message,
+    });
   }
 };
 
 
-// ********************************
-// API to get total sales by category
-// router.get("/sales-by-category", async (req, res) => {
-const salesByCategory = async (req, res) => {
-  try {
-      const salesByCategory = await Order.aggregate([
-          { $unwind: "$orderItems" }, // Flatten order items
-          {
-              $lookup: {
-                  from: "products", // Match with Product collection
-                  localField: "orderItems.product",
-                  foreignField: "_id",
-                  as: "productDetails",
-              },
-          },
-          { $unwind: "$productDetails" },
-          {
-              $lookup: {
-                  from: "categories", // Match with Category collection
-                  localField: "productDetails.category",
-                  foreignField: "_id",
-                  as: "categoryDetails",
-              },
-          },
-          { $unwind: "$categoryDetails" },
-          {
-              $group: {
-                  _id: "$categoryDetails.name", // Group by category name
-                  totalSales: { $sum: "$orderItems.quantity" }, // Sum quantity sold
-              },
-          },
-          { $sort: { totalSales: -1 } }, // Sort by highest sales
-      ]);
-
-      // Format response
-      const labels = salesByCategory.map((item) => item._id);
-      const data = salesByCategory.map((item) => item.totalSales);
-
-
-      res.json({ labels, data });
-  } catch (error) {
-      console.error("Error fetching sales by category:", error);
-      res.status(500).json({ error: "Server error" });
-  }
-};
-
-const orderStatusUpdate = async (req, res) => {
-  try {
-
+//✅ Update Order Delivery Status
+const orderStatusUpdateOld = async (req, res) => {
 
   const { orderId } = req.params;
-  const { newStatus:deliveryStatus } = req.body;
-
-
+  const { deliveryStatus } = req.body;
 
   if (!orderId) {
     return res.status(400).json({ message: "Order ID is required" });
@@ -350,6 +244,59 @@ const orderStatusUpdate = async (req, res) => {
     "Pending", "Processing", "Shipped", "Out for Delivery",
     "Delivered", "Cancelled", "Returned", "Failed Delivery"
   ];
+
+  try {
+    // Validate orderId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ message: "Invalid order ID" });
+    }
+
+    // Validate delivery status
+    if (!validStatuses.includes(deliveryStatus)) {
+      return res.status(400).json({ message: "Invalid delivery status" });
+    }
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Update delivery status
+    order.deliveryStatus = deliveryStatus;
+
+    // If status is "Delivered", set deliveredAt timestamp
+    if (deliveryStatus === "Delivered") {
+      order.deliveredAt = new Date();
+    }
+
+    await order.save();
+
+    res.json({ message: "Delivery status updated successfully", order });
+  } catch (error) {
+    console.error("Error updating delivery status:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// ✅
+const orderStatusUpdate = async (req, res) => {
+  try {
+
+    const { orderId } = req.params;
+    const { deliveryStatus } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({ message: "Order ID is required" });
+    }
+    if (!deliveryStatus) {
+      return res.status(400).json({ message: "Delivery status is required" });
+    }
+
+    const validStatuses = [
+      "Pending", "Processing", "Shipped", "Out for Delivery",
+      "Delivered", "Cancelled", "Returned", "Failed Delivery"
+    ];
 
 
     // Validate orderId
@@ -394,59 +341,173 @@ const orderStatusUpdate = async (req, res) => {
 
     await order.save();
 
-    res.json({success: true, message: "Delivery status updated successfully", order });
+    res.json({ message: "Delivery status updated successfully", order });
   } catch (error) {
     console.error("Error updating delivery status:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// ******************************************
-const  processReturn = async (productId, returnReason, color, size, qty)=> {
+
+
+//✅ Create Order and Push to Shiprocket
+const createOrder = async (req, res) => {
+
+  // const validPaymentMethods = ["COD", "Credit Card", "Debit Card", "Net Banking", "UPI", "Wallet"];
+console.log("createOrder");
+
   try {
-    // Find the product by ID
-    const product = await Product.findById(productId);
-    if (!product) {
-      throw new Error("Product not found");
+    const userId = req.userId;
+
+    // const { addressId, paymentMethod, currency = "INR" } = req.body;
+    const {paymentMethod, currency = "INR" } = req.body;
+
+    console.log("paymentMethod", paymentMethod);
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID." });
     }
 
-    // If the reason is "Item is defective", do not restock
-    if (returnReason === "Item is defective") {
-      return { success: true, message: "Return processed, but stock not updated due to defect." };
+    // const shippingAddress = await Address.findById('67f02aa2440ca60349af633e');
+
+    // const shippingAddress = await Address.find({ user: userId, isDefault: true });
+
+    const shippingAddress = await Address.find({ user: userId, isDefault: true });
+
+
+    // if (!address) {
+    if (!shippingAddress) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found.",
+      });
     }
 
-    // Find the matching color variant
-    const colorVariant = product.varient.find(v => v.colour_varient === color);
-    if (!colorVariant) {
-      throw new Error("Color variant not found");
+    const user = await User.findById(userId).populate("cart.product");
+    if (!user || !user.cart || user.cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // Find the matching size variant
-    const sizeVariant = colorVariant.size_varient.find(s => s.size === size);
-    if (!sizeVariant) {
-      throw new Error("Size variant not found");
+    // if (!shippingAddress || Object.keys(shippingAddress).length === 0) {
+    //   return res.status(400).json({ message: "Shipping address is required" });
+    // }
+
+    let totalAmount = 0;
+    const createdOrders = [];
+
+    for (let cartItem of user.cart) {
+      const product = cartItem.product;
+      const quantity = cartItem.quantity;
+
+      if (!product) continue;
+
+      if (product.stock < quantity) {
+        return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+      }
+
+      const orderPrice = (product.sale_price || product.product_price) * quantity;
+      totalAmount += orderPrice;
+
+      const newOrder = await Order.create({
+        user: userId,
+        orderItems: {
+          product: product._id,
+          quantity
+        },
+        shippingAddress,
+        paymentMethod,
+        totalPrice: orderPrice
+      });
+
+      // Reduce stock
+      product.stock -= quantity;
+      await product.save();
+
+      createdOrders.push(newOrder);
     }
 
-    // Increase the stock quantity for the specific size
-    sizeVariant.qty += qty;
-    product.stock += qty; // Also update total stock
+    let razorpayOrder = null;
 
-    // Save the updated product
-    await product.save();
+    // Create one Razorpay order if payment is not COD
+    if (paymentMethod !== "COD") {
 
-    return { success: true, message: "Return processed and stock updated successfully." };
+      const options = {
+        amount: totalAmount * 100, // in paise
+        currency,
+        receipt: `receipt_${createdOrders[0]._id}`,
+      };
+
+      razorpayOrder = await razorpay.orders.create(options);
+
+      if (!razorpayOrder) {
+        return res.status(500).json({ message: "Razorpay order creation failed" });
+      }
+
+      // Save razorpay ID to all orders
+      await Promise.all(
+        createdOrders.map(async (order) => {
+          order.razorpay_order_id = razorpayOrder.id;
+          await order.save();
+        })
+      );
+    }
+
+    // Clear the cart
+    user.cart = [];
+    user.cart_total = 0;
+    await user.save();
+
+    return res.status(201).json({
+      success: true,
+      paymentMethod,
+      message: "Orders created successfully from cart",
+      orders: createdOrders,
+      totalAmount,
+      razorpayOrder: razorpayOrder || null,
+    });
+
   } catch (error) {
-    return { success: false, message: error.message };
+    console.error("Error placing order:", error);
+    return res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+
+// ✅
+const shiprocketWebhook = async (req, res) => {
+  try {
+    console.log("Webhook Received:", req.body);
+
+    const { order_id, status, awb_code, courier_name } = req.body;
+
+    const order = await Order.findById(order_id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.deliveryStatus = status;
+    order.awb_code = awb_code;
+    order.courier_name = courier_name;
+
+    if (status === "Delivered") order.deliveredAt = new Date();
+
+    await order.save();
+    res.status(200).send("Webhook processed successfully");
+  } catch (error) {
+    console.error("Webhook Error:", error);
+    res.status(500).json({ message: "Webhook processing failed" });
   }
 }
 
+
+
+
 module.exports = {
   createOrder,
+  shiprocketWebhook,
   isproductAvailabe,
   getAllOrder,
+  orderStatusUpdate,
   getAllOrdersByUser,
   orderForGraph,
-  salesByCategory,
-  orderStatusUpdate,
-  processReturn
+  salesByCategory
 };
+

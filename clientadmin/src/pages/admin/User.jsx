@@ -6,28 +6,6 @@ const UserTable = () => {
     const {handleToggleUser,getUserData } = AdminService()
 
 
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:3000/");
-
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch users");
-  //       }
-  //       const data = await response.json();
-
-        
-  //       // Ensure we set an array, even if data.users is undefined
-  //       setUsers(Array.isArray(data?.users) ? data.users : []);
-  //     } catch (error) {
-  //       console.error("Error fetching users:", error);
-  //     }
-  //   };
-  
-  //   fetchUsers();
-  // }, []);
-
-
   useEffect(() => {
     fetchUsers();
     }, []);
@@ -35,6 +13,8 @@ const UserTable = () => {
     const fetchUsers= async()=> {
       try {
         const response = await getUserData();
+
+        console.log(response,"response---------")
       
         setUsers(response.users);
         
@@ -82,7 +62,7 @@ const UserTable = () => {
             {users.length > 0 ? (
               users.map((user, index) => (
                 <tr key={index} className="border-b">
-                  <td className="p-2">{user.userName || "N/A"}</td>
+                  <td className="p-2">{user.name || "N/A"}</td>
                   <td className="p-2">{user.phone || "N/A"}</td>
                   <td className="p-2">{user.email || "N/A"}</td>
                   <td className="p-2">

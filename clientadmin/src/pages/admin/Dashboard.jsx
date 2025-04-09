@@ -13,6 +13,7 @@ const Dashboard = () => {
      const [products, setProducts] = useState([]);
        const [users, setUsers] = useState([]);
          const [orders, setOrders] = useState([])
+         
   // const weeklySalesData = {
   //   labels: ["2023-03-28", "2023-03-05", "2023-03-08"],
   //   datasets: [

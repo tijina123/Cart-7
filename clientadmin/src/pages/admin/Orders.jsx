@@ -15,6 +15,8 @@ const OrderTable = () => {
     try {
   
       const response = await getOrder();
+
+      console.log(response, "response---------+++++++++++++++++++++");
     
       setOrders(response.orders);
     } catch (error) {}
@@ -33,6 +35,7 @@ const OrderTable = () => {
   
     }
   };
+console.log(selectedOrder,"---------------selectedOrder");
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -55,32 +58,32 @@ const OrderTable = () => {
                 <td className="p-2 text-center">{order?.user?.name}</td>
                 <td className="p-2 text-center">{order?.user?.phone}</td>
                 <td className="p-2 text-center">
-                  {order?.orderItems?.map((product, index) => (
+                  {/* {order?.orderItems?.map((product, index) => ( */}
                     <div
-                      key={index}
+                      // key={index}
                       className="flex items-center space-x-2 border-b py-2"
                     >
                       <img
-                        src={product?.product?.images?.[0]}
-                        alt={product.name}
+                        src={order?.orderItems?.product?.images?.[0]}
+                        alt={order.name}
                         className="w-10 h-10 object-cover rounded"
                       />
                       <div>
                         <p className="font-semibold">
-                          {product?.product?.name}
+                          {order?.orderItems?.product?.name}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Qty: {product?.quantity}
+                          Qty: {order?.orderItems?.quantity}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Amount: ${product?.product?.sale_price}
+                          Amount: ${order?.orderItems?.product?.sale_price}
                         </p>
                         <p className="text-xs text-gray-500">
                           Total: ${order?.totalPrice}
                         </p>
                       </div>
                     </div>
-                  ))}
+                   {/* ))} */}
                 </td>
                 <td className="p-2 text-center">
                   <button
@@ -134,40 +137,39 @@ const OrderTable = () => {
             <div className="border-b pb-2 mb-2">
               <h3 className="text-lg font-semibold mb-1">User Details</h3>
               <p>
-                <strong>Name:</strong> {selectedOrder.customerName}
+                <strong>Name:</strong> {selectedOrder?.user?.name}
               </p>
               <p>
-                <strong>Phone:</strong> {selectedOrder.phoneNumber}
+                {/* <strong>Phone:</strong> {selectedOrder?.user?.phone} */}
               </p>
               <p>
-                <strong>Address:</strong> {selectedOrder.address}
+                {/* <strong>Address:</strong> {selectedOrder.address} */}
               </p>
             </div>
 
             {/* Product Details */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">Products</h3>
-              {selectedOrder.products.map((product, index) => (
+              {/* {selectedOrder.products.map((product, index) => ( */}
                 <div
-                  key={index}
                   className="flex items-center gap-2 p-2 border rounded-lg shadow-sm"
                 >
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={selectedOrder?.orderItems?.product?.images?.[0]}
+                    alt={selectedOrder.name}
                     className="w-12 h-12 object-cover rounded-lg"
                   />
                   <div>
-                    <p className="font-semibold">{product.name}</p>
+                    <p className="font-semibold">{selectedOrder?.orderItems?.product?.name}</p>
                     <p className="text-xs text-gray-500">
-                      Qty: {product.quantity}
+                      Qty: {selectedOrder?.orderItems?.quantity}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Amount: ${product.amount}
+                      Amount: ${selectedOrder?.totalPrice}
                     </p>
                   </div>
                 </div>
-              ))}
+               {/* ))} */}
             </div>
 
             {/* Close Button */}

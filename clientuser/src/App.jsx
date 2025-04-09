@@ -10,6 +10,7 @@ import Cart from "./pages/user/Cart";
 import Wishlist from "./pages/user/Wishlist";
 import Checkout from "./pages/user/Checkout";
 import Profile from "./pages/user/Profile";
+import OrderSuccess from "./pages/user/OrderSuccess";
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -320,7 +320,7 @@ const Dashboard = () => {
                           <input type="text" value={userDetails?.phone} className="form-control" required />
                           <label>Email Address *</label>
                           <input type="email" value={userDetails?.email} className="form-control" required />
-                          <button type="submit" className="btn btn-outline-primary-2">Save Changes</button>
+                          {/* <button type="submit" className="btn btn-outline-primary-2">Save Changes</button> */}
                         </form>
                       </div>
 

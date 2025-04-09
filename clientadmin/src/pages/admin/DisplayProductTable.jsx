@@ -14,26 +14,6 @@ const ProductTable = () => {
   const { EditProduct,handleToggleProduct,getProductData } = AdminService()
 
 
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:3000/product");
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch products");
-  //       }
-  //       const data = await response.json();
-  
-  //       setProducts(data.data);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, []);
-
   useEffect(() => {
     fetchProducts();
     }, []);
@@ -41,6 +21,7 @@ const ProductTable = () => {
     const fetchProducts= async()=> {
       try {
         const response = await getProductData();
+        console.log(response,"response---------")
       
         setProducts(response.products);
         
@@ -76,9 +57,11 @@ const ProductTable = () => {
       try {
 
         const response = await EditProduct(editedProduct._id,editedProduct);
-        setProducts(response.categories)
-        setEditProductId(null);
-        setIsModalOpen(false);
+        // setProducts(response.categories)
+        // setEditProductId(null);
+        // setIsModalOpen(false);
+
+        window.location.reload();
 
   //       if (editingCategory) {
          
@@ -110,16 +93,15 @@ const ProductTable = () => {
   //   setIsModalOpen(false);
   // };
 
-  const toggleBlock = () => {
-    setIsBlocked((prev) => !prev);
-  };
-
+ 
   const handleToggle = async(productId)=> {
     try{
 
     const response = await handleToggleProduct(productId);
+
+    window.location.reload();
  
-    setProducts(response?.product);
+    // setProducts(response?.product);
 
     }
     catch(error){
@@ -204,8 +186,8 @@ const ProductTable = () => {
 
       {/* Edit Modal */}
       {isModalOpen && (
-  <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-lg shadow-lg w-[450px] relative">
+  <div className="fixed inset-0  bg-gray-900 bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[450px]  max-h-[600px] overflow-y-auto relative">
       
       {/* Title and Close Button */}
       <div className="flex justify-between items-center mb-4">
@@ -234,6 +216,33 @@ const ProductTable = () => {
           className="border p-3 w-full rounded text-gray-500" 
           placeholder="Category Description" 
         />
+        <label className="block font-medium">Price</label>
+        <input 
+          name="product_price" 
+          value={editedProduct.product_price} 
+          onChange={handleChange} 
+
+          className="border p-3 w-full rounded text-gray-500 bg-gray-100" 
+        />
+
+<label className="block font-medium">Sale Price</label>
+        <input 
+          name="sale_price" 
+          value={editedProduct.sale_price} 
+          onChange={handleChange} 
+
+          className="border p-3 w-full rounded text-gray-500 bg-gray-100" 
+        />
+
+<label className="block font-medium">Stock</label>
+        <input 
+          name="stock" 
+          value={editedProduct.stock} 
+          onChange={handleChange} 
+
+          className="border p-3 w-full rounded text-gray-500 bg-gray-100" 
+        />
+        
 
         <label className="block font-medium">Parent Category</label>
         <input 
@@ -249,10 +258,10 @@ const ProductTable = () => {
           className="border p-2 w-full rounded" 
         />
 
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <input type="checkbox" id="published" className="mr-2" />
           <label htmlFor="published" className="text-gray-700">Published</label>
-        </div>
+        </div> */}
       </div>
 
       {/* Buttons */}

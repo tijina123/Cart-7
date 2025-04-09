@@ -12,9 +12,10 @@ export const AuthProvider = ({children})=>{
     const image = localStorage.getItem("profileImage");
     const name = localStorage.getItem("name")
     const role = localStorage.getItem("role");
+    const email = localStorage.getItem("email");
 
     if (accessToken && role && !auth.accessToken) {
-        setAuth({ accessToken, role, image, name });
+        setAuth({ accessToken, role, image, name, email });
     };
     return (
         <AuthContext.Provider value={{ auth, setAuth }}>

@@ -31,7 +31,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     const response = await postRegister(userData);
-    if(success === true) {
+    if(response?.success === true) {
       setLoading(true);
       setError(""); 
       navigate("/login");

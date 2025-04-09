@@ -19,7 +19,7 @@ const Login = () => {
       
       let userData = { email, password };
       const response = await postLogin(userData);
-      console.log(response);
+      console.log(response,'--------------res');
 
       if (response?.data?.success) {
         const accessToken = response?.data?.accessToken;
@@ -34,8 +34,12 @@ const Login = () => {
 
         setAuth({ accessToken, role, image, name });
 
+        navigate("/dashboard");
 
         switch (role) {
+          case "super Admin":
+            navigate("/dashboard");
+            break;
           case "admin":
             navigate("/dashboard");
             break;
