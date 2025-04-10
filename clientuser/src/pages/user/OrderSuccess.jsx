@@ -18,7 +18,10 @@ const OrderSuccess = () => {
   }, []);
 
   return (
-    <div className="d-flex justify-content-center align-items-center flex-column" style={{ height: "100vh" }}>
+    <div
+      className="d-flex justify-content-center align-items-center flex-column"
+      style={{ height: "100vh" }}
+    >
       {showConfetti && <Confetti width={width} height={height} />}
 
       <motion.div
@@ -27,8 +30,10 @@ const OrderSuccess = () => {
         transition={{ type: "spring", stiffness: 200 }}
         className="bg-white p-5 shadow rounded text-center"
       >
-        <h1 className="text-success mb-3" >🎉 Order Successful!</h1>
-        <p className="lead">Thank you for your purchase. Your order has been placed successfully.</p>
+        <h1 className="text-success mb-3">🎉 Order Successful!</h1>
+        <p className="lead">
+          Thank you for your purchase. Your order has been placed successfully.
+        </p>
 
         <button className="btn btn-primary mt-4" onClick={() => navigate("/")}>
           Go to Home

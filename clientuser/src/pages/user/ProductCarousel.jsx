@@ -3,15 +3,13 @@ import OwlCarousel from "react-owl-carousel";
 import "owl.carousel/dist/assets/owl.carousel.css";
 import "owl.carousel/dist/assets/owl.theme.default.css";
 import UserService from "../../services/user-api-services/UserService";
-import toast, { Toaster } from 'react-hot-toast';
-
+import toast, { Toaster } from "react-hot-toast";
 
 const ProductCarousel = ({ products }) => {
-  const { addToCart, addToWihlist } = UserService()
+  const { addToCart, addToWihlist } = UserService();
 
   const [carouselProducts, setCarouselProducts] = useState([]);
   const [carouselKey, setCarouselKey] = useState(0);
-
 
   useEffect(() => {
     console.log("Received products:", products);
@@ -21,45 +19,34 @@ const ProductCarousel = ({ products }) => {
     }
   }, [products]);
 
-
   const handleAddToCart = async (userId, productId, quantity) => {
     try {
-      const data = { userId, productId, quantity }
+      const data = { userId, productId, quantity };
       const response = await addToCart(data);
       if (response?.success) {
-        toast.success(response?.message)
+        toast.success(response?.message);
       }
-
     } catch (error) {
-      toast.error(error?.response?.data?.message)
-
+      toast.error(error?.response?.data?.message);
     }
-
-  }
+  };
 
   const handleAddToWishlist = async (userId, productId, quantity) => {
-
     try {
-      const data = { userId, productId, quantity }
+      const data = { userId, productId, quantity };
       const response = await addToWihlist(data);
 
       if (response?.success) {
-        toast.success(response?.message)
+        toast.success(response?.message);
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message)
-
+      toast.error(error?.response?.data?.message);
     }
-
-
-  }
+  };
 
   return (
     <>
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
+      <Toaster position="top-center" reverseOrder={false} />
 
       <OwlCarousel
         key={carouselKey} // Force re-render
@@ -68,7 +55,10 @@ const ProductCarousel = ({ products }) => {
         margin={20}
         dots={true}
         nav={false}
-        navText={["<span class='custom-nav prev'>&#10094;</span>", "<span class='custom-nav next'>&#10095;</span>"]}
+        navText={[
+          "<span class='custom-nav prev'>&#10094;</span>",
+          "<span class='custom-nav next'>&#10095;</span>",
+        ]}
         responsive={{
           0: { items: 2 },
           480: { items: 2 },
@@ -77,7 +67,8 @@ const ProductCarousel = ({ products }) => {
           1280: { items: 5, nav: true },
         }}
       >
-        {carouselProducts && carouselProducts.length && (
+        {carouselProducts &&
+          carouselProducts.length &&
           carouselProducts.map((data) => (
             <div className="product" key={data._id}>
               <figure className="product-media">
@@ -87,29 +78,31 @@ const ProductCarousel = ({ products }) => {
                   src={data?.images?.[0]}
                   alt="Product image"
                   className="product-image"
-                  style={{  height: '200px', objectFit: 'cover' }}
+                  style={{ height: "200px", objectFit: "cover" }}
                 />
-                 {/* <img
-                  src="assets/images/demos/demo-13/products/product-1.jpg"
-                  alt="Product image"
-                  className="product-image"
-                /> */}
-                {/* </a> */}
-                {/* <button onClick={()=>handleAddToCart('67bffce8e7dae9e3c14f3c15',data._id,1)}>add to cart temp</button> */}
+
                 <div className="product-action-vertical">
-                  <button onClick={() => handleAddToWishlist('67bffce8e7dae9e3c14f3c15', data._id, 1)} className="btn-product-icon btn-wishlist btn-expandable">
+                  <button
+                    onClick={() =>
+                      handleAddToWishlist(
+                        "67bffce8e7dae9e3c14f3c15",
+                        data._id,
+                        1
+                      )
+                    }
+                    className="btn-product-icon btn-wishlist btn-expandable"
+                  >
                     <span>add to wishlist</span>
                   </button>
-                  {/* <a href="#" className="btn-product-icon btn-compare" title="Compare">
-                <span>Compare</span>
-              </a>
-              <a href="popup/quickView.html" className="btn-product-icon btn-quickview" title="Quick view">
-                <span>Quick view</span>
-              </a> */}
                 </div>
                 <div className="product-action">
-                  {/* <button className="btn-product btn-cart" title="Add to cart" onClick={()=>handleAddToCart('67bffce8e7dae9e3c14f3c15',data._id,1)}> */}
-                  <button className="btn-product btn-cart" title="Add to cart" onClick={() => handleAddToCart('67bffce8e7dae9e3c14f3c15', data._id, 1)}>
+                  <button
+                    className="btn-product btn-cart"
+                    title="Add to cart"
+                    onClick={() =>
+                      handleAddToCart("67bffce8e7dae9e3c14f3c15", data._id, 1)
+                    }
+                  >
                     <span>add to cart</span>
                   </button>
                 </div>
@@ -133,8 +126,7 @@ const ProductCarousel = ({ products }) => {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
       </OwlCarousel>
     </>
   );

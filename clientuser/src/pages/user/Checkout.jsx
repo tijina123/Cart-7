@@ -20,8 +20,6 @@ const Checkout = () => {
   const [total, setTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("UPI");
 
-  // const [order, setOrder] = useState(null);
-
   const [address, setAddress] = useState({
     fullName: "",
     phone: "",
@@ -60,9 +58,7 @@ const Checkout = () => {
         ...prevState, // Spread previous state
         ...response?.address,
       }));
-    } catch (err) {
-      // setError(err.response?.data?.message || "Something went wrong");
-    }
+    } catch (err) {}
   };
 
   const handleChange = (e) => {
@@ -83,7 +79,6 @@ const Checkout = () => {
   };
 
   const handleSubmitAddress = async () => {
-    // e.preventDefault();
     try {
       const response = await postAddress(address);
       console.log("Address added successfully:", response);
@@ -97,34 +92,25 @@ const Checkout = () => {
       }
     } catch (error) {
       console.error("Error adding address:", error);
-      // alert("Failed to add address.");
     }
   };
 
   const sendOrder = async () => {
     try {
-
-      // const response = await checkPorductAvailability();
-
-      const response = await postOrder({paymentMethod});
+      const response = await postOrder({ paymentMethod });
 
       if (response?.success) {
+        console.log("Order placed successfully:", response);
 
-        console.log("Order placed successfully:", response);  
+        if (response?.paymentMethod == "UPI") {
+          console.log("Razorpay Order =========  ", response?.razorpayOrder);
 
-      if (response?.paymentMethod == "UPI") {
+          handlePayment(response?.razorpayOrder);
+        } else {
+          console.log("COD Order =========  ", response);
 
-        console.log("Razorpay Order =========  ", response?.razorpayOrder);
-
-        handlePayment(response?.razorpayOrder);
-       
-      } else{
-        
-        console.log("COD Order =========  ", response);
-        
-        navigate('/order-success');
-      }
-
+          navigate("/order-success");
+        }
       }
     } catch (error) {
       console.error("Error sending order:", error);
@@ -242,7 +228,6 @@ const Checkout = () => {
                     </form>
                   </div>
                   {/* End .cart-discount */}
-                  {/* <a href="#" className="btn btn-outline-dark-2"><span>UPDATE CART</span><i className="icon-refresh" /></a> */}
                 </div>
                 {/* End .cart-bottom */}
               </div>
@@ -299,35 +284,35 @@ const Checkout = () => {
                           className="accordion-summary"
                           id="accordion-payment"
                         >
-                            <div className="space-y-3">
-                              <label className="flex items-center space-x-3 text-gray-700">
-                                <input
-                                  type="radio"
-                                  name="payment"
-                                  value="gpay"
-                                  checked={paymentMethod === "UPI"}
-                                  onChange={() => setPaymentMethod("UPI")}
-                                  className="form-radio h-4 w-4 text-blue-500"
-                                />
-                                <span>Google Pay / Phone Pay</span>
-                              </label>
+                          <div className="space-y-3">
+                            <label className="flex items-center space-x-3 text-gray-700">
+                              <input
+                                type="radio"
+                                name="payment"
+                                value="gpay"
+                                checked={paymentMethod === "UPI"}
+                                onChange={() => setPaymentMethod("UPI")}
+                                className="form-radio h-4 w-4 text-blue-500"
+                              />
+                              <span>Google Pay / Phone Pay</span>
+                            </label>
 
-                              <label className="flex items-center space-x-3 text-gray-700">
-                                <input
-                                  type="radio"
-                                  name="payment"
-                                  value="cod"
-                                  checked={paymentMethod === "COD"}
-                                  onChange={() => setPaymentMethod("COD")}
-                                  className="form-radio h-4 w-4 text-blue-500"
-                                />
-                                <span>Cash on Delivery</span>
-                              </label>
-                            </div>
+                            <label className="flex items-center space-x-3 text-gray-700">
+                              <input
+                                type="radio"
+                                name="payment"
+                                value="cod"
+                                checked={paymentMethod === "COD"}
+                                onChange={() => setPaymentMethod("COD")}
+                                className="form-radio h-4 w-4 text-blue-500"
+                              />
+                              <span>Cash on Delivery</span>
+                            </label>
+                          </div>
                           {/* End .card */}
                         </div>
                         {/* End .accordion */}
-                        {/* <button type="submit" className="btn btn-outline-primary-2 btn-order btn-block" onClick={}> */}
+
                         <button
                           type="button"
                           className="btn btn-outline-primary-2 btn-order btn-block"
@@ -481,10 +466,7 @@ const Checkout = () => {
                                 </p>
                                 {/* Select button */}
                                 {address.isDefault ? (
-                                  <button
-                                    className="btn btn-success mt-2"
-                                    // onClick={() => handleSelectAddress(address._id)}
-                                  >
+                                  <button className="btn btn-success mt-2">
                                     Selected Address
                                   </button>
                                 ) : (

@@ -3,11 +3,20 @@ const { Coupon } = require("../models/Coupon");
 // ✅ Add a New Coupon
 const addCoupon = async (req, res) => {
   try {
-    const { code, discountType, discountValue, minPurchase, maxDiscount, expiryDate } = req.body;
+    const {
+      code,
+      discountType,
+      discountValue,
+      minPurchase,
+      maxDiscount,
+      expiryDate,
+    } = req.body;
 
     // Validate required fields
     if (!code || !discountType || !discountValue || !expiryDate) {
-      return res.status(400).json({ message: "All required fields must be provided" });
+      return res
+        .status(400)
+        .json({ message: "All required fields must be provided" });
     }
 
     // Check if coupon already exists
@@ -26,7 +35,9 @@ const addCoupon = async (req, res) => {
       expiryDate,
     });
 
-    res.status(201).json({ message: "Coupon created successfully", coupon: newCoupon });
+    res
+      .status(201)
+      .json({ message: "Coupon created successfully", coupon: newCoupon });
   } catch (error) {
     res.status(500).json({ message: error.message || "Internal Server Error" });
   }
@@ -62,13 +73,17 @@ const getCouponById = async (req, res) => {
 const updateCoupon = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedCoupon = await Coupon.findByIdAndUpdate(id, req.body, { new: true });
+    const updatedCoupon = await Coupon.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
 
     if (!updatedCoupon) {
       return res.status(404).json({ message: "Coupon not found" });
     }
 
-    res.status(200).json({ message: "Coupon updated successfully", coupon: updatedCoupon });
+    res
+      .status(200)
+      .json({ message: "Coupon updated successfully", coupon: updatedCoupon });
   } catch (error) {
     res.status(500).json({ message: error.message || "Internal Server Error" });
   }
@@ -93,15 +108,19 @@ const deleteCoupon = async (req, res) => {
 // ✅ Validate and Apply Coupon (for checkout)
 const applyCoupon = async (req, res) => {
   try {
-    
     const { code, cartTotal } = req.body;
 
     if (!code || !cartTotal) {
-      return res.status(400).json({ message: "Coupon code and cart total are required" });
+      return res
+        .status(400)
+        .json({ message: "Coupon code and cart total are required" });
     }
 
     // Find coupon
-    const coupon = await Coupon.findOne({ code: code.toUpperCase(), expiryDate: { $gte: new Date() } });
+    const coupon = await Coupon.findOne({
+      code: code.toUpperCase(),
+      expiryDate: { $gte: new Date() },
+    });
 
     if (!coupon) {
       return res.status(400).json({ message: "Invalid or expired coupon" });
@@ -109,13 +128,18 @@ const applyCoupon = async (req, res) => {
 
     // Check if minimum purchase condition is met
     if (cartTotal < coupon.minPurchase) {
-      return res.status(400).json({ message: `Minimum purchase of ₹${coupon.minPurchase} required` });
+      return res
+        .status(400)
+        .json({
+          message: `Minimum purchase of ₹${coupon.minPurchase} required`,
+        });
     }
 
     // Calculate discount
-    let discountAmount = coupon.discountType === "percentage"
-      ? (cartTotal * coupon.discountValue) / 100
-      : coupon.discountValue;
+    let discountAmount =
+      coupon.discountType === "percentage"
+        ? (cartTotal * coupon.discountValue) / 100
+        : coupon.discountValue;
 
     // Apply max discount limit
     if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {

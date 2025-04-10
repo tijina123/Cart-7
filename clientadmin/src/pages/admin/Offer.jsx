@@ -19,14 +19,11 @@ const Offers = () => {
   const fetchOffers = async () => {
     try {
       const response = await getOffer();
-      if(response.success){ 
-      setOffers(response.offers);
+      if (response.success) {
+        setOffers(response.offers);
       }
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
-  
 
   useEffect(() => {
     fetchOffers();
@@ -38,13 +35,12 @@ const Offers = () => {
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.description.trim())
       newErrors.description = "Description is required";
-    // if (!formData.minPurchase || formData.minPurchase < 0)
-    //   newErrors.minPurchase = "Enter a valid minimum purchase";
+
     if (!formData.expiryDate) newErrors.expiryDate = "Expiry date is required";
 
     if (!formData.discountValue || formData.discountValue <= 0) {
       newErrors.discountValue = "Discount value must be greater than 0";
-    } 
+    }
     if (!formData.discountType) {
       newErrors.discountType = "Select Discount type";
     }
@@ -54,32 +50,26 @@ const Offers = () => {
   };
 
   const handleAddOffer = async () => {
-   
-    
     if (!validateForm()) return;
     setLoading(true);
-   
-    
+
     try {
       const response = await AddOffer(formData);
 
-      if(response.success){ 
+      if (response.success) {
+        fetchOffers();
 
-      fetchOffers();
+        setFormData({
+          title: "",
+          description: "",
+          discountType: "",
+          discountValue: "",
+          expiryDate: "",
+          minPurchase: "",
+        });
 
-      setFormData({
-        title: "",
-        description: "",
-        discountType: "",
-        discountValue: "",
-        expiryDate: "",
-        minPurchase: "",
-      });
-
-      setErrors({});
-    }
-
-
+        setErrors({});
+      }
     } catch (error) {
       console.error("Error adding offer:", error);
     }
@@ -108,21 +98,15 @@ const Offers = () => {
     });
   };
 
-  const handleToggle = async(productId)=> {
-    try{
-    const response = await handleToggleOffer(productId);
+  const handleToggle = async (productId) => {
+    try {
+      const response = await handleToggleOffer(productId);
 
-    if(response.success){ 
-      fetchOffers();
-    }
-
-    }
-    catch(error){
-      // toast.error(error?.response?.data?.message)
-
-    }
-  }
-
+      if (response.success) {
+        fetchOffers();
+      }
+    } catch (error) {}
+  };
 
   return (
     <div className="p-6">
@@ -154,7 +138,7 @@ const Offers = () => {
       </div>
 
       {/* Discount Section */}
-      {/* <h2 className="text-xl font-semibold mb-2">Discount Details</h2> */}
+
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Discount Type Dropdown */}
         <div className="flex flex-col">
@@ -169,8 +153,8 @@ const Offers = () => {
           >
             <option value="">Select discount type</option>
             <option value="percentage">Percentage (%)</option>
-            {/* <option value="fixed">Fixed Amount ($)</option> */}
-          </select>{errors.discountType && (
+          </select>
+          {errors.discountType && (
             <p className="text-red-500 text-sm mt-1">{errors.discountType}</p>
           )}
         </div>
@@ -198,13 +182,10 @@ const Offers = () => {
         {/* **************************** */}
         {/* Discount Value */}
         <div className="flex flex-col">
-          <label className="text-gray-700 font-medium mb-1">
-            Expiry Date
-          </label>
+          <label className="text-gray-700 font-medium mb-1">Expiry Date</label>
           <input
             type="date"
             name="expiryDate"
-            // placeholder="Discount Value"
             value={formData.expiryDate}
             onChange={handleChange}
             className={`border p-2 w-full ${
@@ -239,8 +220,8 @@ const Offers = () => {
               "Discount Type",
               "Discount Value",
               "Expiry Date",
-              // "Actions",
-              "Status"
+
+              "Status",
             ].map((head) => (
               <th key={head} className="border p-2">
                 {head}
@@ -259,29 +240,23 @@ const Offers = () => {
                   ? `${offer.discountValue}%`
                   : `$${offer.discountValue}`}
               </td>
-              {/* <td className="border p-2">${offer.minPurchase}</td> */}
+
               <td className="border p-2">
                 {new Date(offer.expiryDate).toLocaleDateString()}
               </td>
-              {/* <td className="border p-2">
-                <button
-                  onClick={() => handleDelete(offer._id)}
-                  className="bg-red-500 text-white p-1 rounded"
-                >
-                  Delete
-                </button>
-              </td> */}
+
               <td className="p-2 text-center">
-                  {/* <button onClick={() => handleDeleteCategory(category._id)} className="text-red-500">🗑️</button> */}
-                  <button
-         onClick={() => handleToggle(offer._id)}
-      className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-        offer?.isActive ? "bg-green-500 text-white":"bg-red-500 text-white"
-      }`}
-    >
-      {offer?.isActive ? "Block":"Unblock"}
-    </button>
-                </td>
+                <button
+                  onClick={() => handleToggle(offer._id)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    offer?.isActive
+                      ? "bg-green-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {offer?.isActive ? "Block" : "Unblock"}
+                </button>
+              </td>
             </tr>
           ))}
 

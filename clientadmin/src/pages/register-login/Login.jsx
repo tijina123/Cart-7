@@ -10,16 +10,16 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { setAuth } = useAuth();
   const navigate = useNavigate();
-  const { postLogin} = AdminService();
+  const { postLogin } = AdminService();
 
   const handleLogin = async (e) => {
     try {
       e.preventDefault();
       console.log("Logging in with:", { email, password });
-      
+
       let userData = { email, password };
       const response = await postLogin(userData);
-      console.log(response,'--------------res');
+      console.log(response, "--------------res");
 
       if (response?.data?.success) {
         const accessToken = response?.data?.accessToken;
@@ -44,7 +44,7 @@ const Login = () => {
             navigate("/dashboard");
             break;
           default:
-            navigate("/login")
+            navigate("/login");
         }
       }
     } catch (error) {
@@ -59,23 +59,23 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <div className="mb-3">
             <label className="form-label">Email</label>
-            <input 
-              type="email" 
-              className="form-control" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              className="form-control"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
           <div className="mb-3 position-relative">
             <label className="form-label">Password</label>
             <div className="input-group">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                className="form-control" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
               <span
                 className="input-group-text"
@@ -86,10 +86,14 @@ const Login = () => {
               </span>
             </div>
           </div>
-          <button type="submit" className="btn btn-danger w-100">Login</button>
+          <button type="submit" className="btn btn-danger w-100">
+            Login
+          </button>
         </form>
         <div className="text-center mt-3">
-          <p>Don't have an account? <Link to="/register">Register</Link></p>
+          <p>
+            Don't have an account? <Link to="/register">Register</Link>
+          </p>
         </div>
       </div>
     </div>

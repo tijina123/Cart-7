@@ -13,15 +13,13 @@ const OrderTable = () => {
 
   const fetchOrders = async () => {
     try {
-  
       const response = await getOrder();
 
       console.log(response, "response---------+++++++++++++++++++++");
-    
+
       setOrders(response.orders);
     } catch (error) {}
   };
-
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -31,11 +29,9 @@ const OrderTable = () => {
       if (response?.success) {
         fetchOrders();
       }
-    } catch (error) {
-  
-    }
+    } catch (error) {}
   };
-console.log(selectedOrder,"---------------selectedOrder");
+  console.log(selectedOrder, "---------------selectedOrder");
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -58,32 +54,28 @@ console.log(selectedOrder,"---------------selectedOrder");
                 <td className="p-2 text-center">{order?.user?.name}</td>
                 <td className="p-2 text-center">{order?.user?.phone}</td>
                 <td className="p-2 text-center">
-                  {/* {order?.orderItems?.map((product, index) => ( */}
-                    <div
-                      // key={index}
-                      className="flex items-center space-x-2 border-b py-2"
-                    >
-                      <img
-                        src={order?.orderItems?.product?.images?.[0]}
-                        alt={order.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                      <div>
-                        <p className="font-semibold">
-                          {order?.orderItems?.product?.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Qty: {order?.orderItems?.quantity}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Amount: ${order?.orderItems?.product?.sale_price}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Total: ${order?.totalPrice}
-                        </p>
-                      </div>
+                  <div className="flex items-center space-x-2 border-b py-2">
+                    <img
+                      src={order?.orderItems?.product?.images?.[0]}
+                      alt={order.name}
+                      className="w-10 h-10 object-cover rounded"
+                    />
+                    <div>
+                      <p className="font-semibold">
+                        {order?.orderItems?.product?.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Qty: {order?.orderItems?.quantity}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Amount: ${order?.orderItems?.product?.sale_price}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Total: ${order?.totalPrice}
+                      </p>
                     </div>
-                   {/* ))} */}
+                  </div>
+                  {/* ))} */}
                 </td>
                 <td className="p-2 text-center">
                   <button
@@ -139,37 +131,31 @@ console.log(selectedOrder,"---------------selectedOrder");
               <p>
                 <strong>Name:</strong> {selectedOrder?.user?.name}
               </p>
-              <p>
-                {/* <strong>Phone:</strong> {selectedOrder?.user?.phone} */}
-              </p>
-              <p>
-                {/* <strong>Address:</strong> {selectedOrder.address} */}
-              </p>
             </div>
 
             {/* Product Details */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">Products</h3>
-              {/* {selectedOrder.products.map((product, index) => ( */}
-                <div
-                  className="flex items-center gap-2 p-2 border rounded-lg shadow-sm"
-                >
-                  <img
-                    src={selectedOrder?.orderItems?.product?.images?.[0]}
-                    alt={selectedOrder.name}
-                    className="w-12 h-12 object-cover rounded-lg"
-                  />
-                  <div>
-                    <p className="font-semibold">{selectedOrder?.orderItems?.product?.name}</p>
-                    <p className="text-xs text-gray-500">
-                      Qty: {selectedOrder?.orderItems?.quantity}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Amount: ${selectedOrder?.totalPrice}
-                    </p>
-                  </div>
+
+              <div className="flex items-center gap-2 p-2 border rounded-lg shadow-sm">
+                <img
+                  src={selectedOrder?.orderItems?.product?.images?.[0]}
+                  alt={selectedOrder.name}
+                  className="w-12 h-12 object-cover rounded-lg"
+                />
+                <div>
+                  <p className="font-semibold">
+                    {selectedOrder?.orderItems?.product?.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Qty: {selectedOrder?.orderItems?.quantity}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Amount: ${selectedOrder?.totalPrice}
+                  </p>
                 </div>
-               {/* ))} */}
+              </div>
+              {/* ))} */}
             </div>
 
             {/* Close Button */}

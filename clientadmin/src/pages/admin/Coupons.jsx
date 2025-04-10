@@ -3,7 +3,11 @@ import axios from "axios";
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
-  const [formData, setFormData] = useState({ code: "", discount: "", expiryDate: "" });
+  const [formData, setFormData] = useState({
+    code: "",
+    discount: "",
+    expiryDate: "",
+  });
 
   useEffect(() => {
     // fetchCoupons();
@@ -47,7 +51,10 @@ const Coupons = () => {
       <h2 className="text-xl font-bold mb-4">Coupons Management</h2>
 
       {/* Coupon Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded mb-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-4 shadow rounded mb-6"
+      >
         <input
           type="text"
           name="code"
@@ -74,7 +81,9 @@ const Coupons = () => {
           required
           className="p-2 border rounded mr-2"
         />
-        <button type="submit" className="bg-green-600 text-white p-2 rounded">Add Coupon</button>
+        <button type="submit" className="bg-green-600 text-white p-2 rounded">
+          Add Coupon
+        </button>
       </form>
 
       {/* Coupons Table */}
@@ -92,9 +101,14 @@ const Coupons = () => {
             <tr key={coupon._id} className="text-center">
               <td className="p-2 border">{coupon.code}</td>
               <td className="p-2 border">{coupon.discount}%</td>
-              <td className="p-2 border">{new Date(coupon.expiryDate).toLocaleDateString()}</td>
               <td className="p-2 border">
-                <button onClick={() => handleDelete(coupon._id)} className="bg-red-500 text-white p-1 rounded">
+                {new Date(coupon.expiryDate).toLocaleDateString()}
+              </td>
+              <td className="p-2 border">
+                <button
+                  onClick={() => handleDelete(coupon._id)}
+                  className="bg-red-500 text-white p-1 rounded"
+                >
                   Delete
                 </button>
               </td>

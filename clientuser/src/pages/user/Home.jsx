@@ -7,6 +7,7 @@ import UserService from "../../services/user-api-services/UserService";
 import { Link } from 'react-router-dom';
 
 
+
 const Home = () => {
   const { getHomeProductsByCategory, getHomeProducts } = UserService()
 
@@ -44,24 +45,13 @@ const Home = () => {
 
   }
 
-  const getBannerImage = async () => {
-    try {
-      // const productsData = await getHomePageData();
-      // console.log(productsData,"====productsData====");
 
-      // setAllProducts(productsData);
-
-    } catch (error) {
-
-    }
-
-  }
 
 
   return (
     <div className="page-wrapper">
       <main className="main">
-        <div className="intro-slider-container">
+        <div className="intro-slider-container" >
           <div className="intro-slider owl-carousel owl-simple owl-nav-inside" data-toggle="owl" data-owl-options="{
                   &quot;nav&quot;: false,
                   &quot;responsive&quot;: {
@@ -70,7 +60,7 @@ const Home = () => {
                       }
                   }
               }">
-            <div className="intro-slide" style={{ backgroundImage: 'url(assets/images/demos/demo-13/slider/slider-1.jpeg)', objectFit: 'contain' }}>
+            <div className="intro-slide" style={{ backgroundImage: 'url(assets/images/demos/demo-13/slider/slider-1.jpeg)'}}>
               <div className="container intro-content">
                 <div className="row">
                   <div className="col-auto offset-lg-3 intro-col">
@@ -93,17 +83,7 @@ const Home = () => {
               <div className="container intro-content">
                 <div className="row">
                   <div className="col-auto offset-lg-3 intro-col">
-                    {/* <h3 className="intro-subtitle">Trevel &amp; Outdoor</h3>
-                    <h1 className="intro-title">Original Outdoor <br />Beanbag
-                      <span>
-                        <sup className="font-weight-light line-through">$89,99</sup>
-                        <span className="text-primary">$29<sup>,99</sup></span>
-                      </span>
-                    </h1> */}
-                    {/* <a href="category.html" className="btn btn-outline-primary-2">
-                      <span>Shop Now</span>
-                      <i className="icon-long-arrow-right" />
-                    </a> */}
+                   
                   </div>{/* End .col-auto offset-lg-3 */}
                 </div>{/* End .row */}
               </div>{/* End .container intro-content */}
@@ -112,17 +92,7 @@ const Home = () => {
               <div className="container intro-content">
                 <div className="row">
                   <div className="col-auto offset-lg-3 intro-col">
-                    {/* <h3 className="intro-subtitle">Fashion Promotions</h3>
-                    <h1 className="intro-title">Tan Suede <br />Biker Jacket
-                      <span>
-                        <sup className="font-weight-light line-through">$240,00</sup>
-                        <span className="text-primary">$180<sup>,99</sup></span>
-                      </span>
-                    </h1> */}
-                    {/* <a href="category.html" className="btn btn-outline-primary-2">
-                      <span>Shop Now</span>
-                      <i className="icon-long-arrow-right" />
-                    </a> */}
+                   
                   </div>{/* End .col-auto offset-lg-3 */}
                 </div>{/* End .row */}
               </div>{/* End .container intro-content */}
@@ -239,8 +209,8 @@ const Home = () => {
             </div>{/* End .col-lg-6 */}
           </div>{/* End .row */}
         </div>{/* End .container */}
-        <div className="mb-3" />{/* End .mb-3 */}
-        <div className="bg-light pt-3 pb-5">
+        <div className="mb-3 filter-products" />{/* End .mb-3 */}
+        <div className="bg-light pt-3 pb-5 " >
 
           {/* ****************** show products ****************** */}
           <div className="container" >

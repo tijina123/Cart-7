@@ -20,11 +20,12 @@ const RegisterModal = ({ onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -50 }}
-        className="bg-white p-10 rounded-2xl shadow-xl w-2/5 max-h-screen overflow-y-auto"
-      >
+  initial={{ opacity: 0, y: -50 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -50 }}
+  className="bg-white p-10 rounded-2xl shadow-xl w-full sm:w-4/5 md:w-3/5 lg:w-2/5 max-h-screen overflow-y-auto"
+>
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-4xl font-semibold">Seller Register</h2>
           <button onClick={onClose} className="text-gray-600 hover:text-gray-900">

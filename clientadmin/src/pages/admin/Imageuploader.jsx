@@ -31,7 +31,11 @@ const ImageUploader = () => {
         onChange={handleImageChange}
         className="border p-2 rounded-md w-full"
       />
-      <ErrorMessage name="images" component="p" className="text-red-500 text-sm" />
+      <ErrorMessage
+        name="images"
+        component="p"
+        className="text-red-500 text-sm"
+      />
       <div className="mt-2 flex flex-wrap gap-2">
         {values.images.map((image, index) => (
           <div key={index} className="relative">

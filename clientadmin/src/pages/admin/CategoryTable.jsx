@@ -16,28 +16,6 @@ const CategoryTable = () => {
     image: null,
   });
 
-  // Fetch categories from backend
-  // useEffect(() => {
-  //   const fetchCategories = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:3000/category");
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch categories");
-  //       }
-  //       const data = await response.json();
-  //   
-  //       setCategories(data?.categories); // Assuming backend returns an array of categories
-  //     } catch (error) {
-  //       console.error("Error fetching categories:", error);
-  //       // setError(error.message);
-  //     } finally {
-  //       // setLoading(false);
-  //     }
-  //   };
-
-  //   fetchCategories();
-  // }, []);
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -45,11 +23,10 @@ const CategoryTable = () => {
   const fetchCategories = async () => {
     try {
       const response = await getCategoryeData();
-    
+
       setCategories(response.categories);
     } catch (error) {}
   };
-
 
   // Handle delete category
   const handleDeleteCategory = async (categoryId) => {
@@ -70,11 +47,8 @@ const CategoryTable = () => {
     }
   };
 
-
-
   // Handle category submission (Add or Edit)
   const handleSaveCategory = async () => {
-    
     if (newCategory.name.trim() === "") return;
 
     const categoryData = {
@@ -86,9 +60,6 @@ const CategoryTable = () => {
       status: "Selling",
     };
 
- 
-
-
     try {
       if (editingCategory) {
         const response = await EditCategory(editingCategory._id, categoryData);
@@ -96,7 +67,7 @@ const CategoryTable = () => {
         clearState();
       } else {
         const response = await AddCategory(categoryData);
-     
+
         setCategories(response.categories);
         clearState();
       }
@@ -188,7 +159,6 @@ const CategoryTable = () => {
 
   const handleToggle = async (productId) => {
     try {
-  
       const response = await handleToggleCategory(productId);
 
       // setProducts(response?.product);
@@ -200,18 +170,6 @@ const CategoryTable = () => {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      {/* Header Buttons */}
-
-      {/* ***********old */}
-      {/* <div className="flex justify-between mb-4">
-        <div>
-          <button className="px-4 py-2 bg-white border rounded shadow">Export</button>
-          <button className="px-4 py-2 bg-white border rounded shadow ml-2">Import</button>
-        </div>
-        <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-green-500 text-white rounded">+ Add Category</button>
-      </div> */}
-      {/* ***********old */}
-
       <div className="flex flex-wrap justify-between gap-2 mb-4">
         <div className="flex flex-wrap gap-2">
           <button className="px-4 py-2 bg-white border rounded shadow">
@@ -228,21 +186,6 @@ const CategoryTable = () => {
           + Add Category
         </button>
       </div>
-
-      {/* Filters */}
-      {/* <div className="grid md:grid-cols-4 gap-4 mb-4">
-        <input type="text" placeholder="Search Product" className="border p-2 rounded w-full" />
-        <select className="border p-2 rounded w-full">
-          <option>Category</option>
-        </select>
-        <select className="border p-2 rounded w-full">
-          <option>Price</option>
-        </select>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 bg-green-600 text-white rounded">Filter</button>
-          <button className="px-4 py-2 bg-gray-300 rounded">Reset</button>
-        </div>
-      </div> */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <input
@@ -271,12 +214,10 @@ const CategoryTable = () => {
         <table className="w-full border-collapse text-xs md:text-sm">
           <thead>
             <tr className="bg-gray-200  justify-center">
-              {/* <th className="p-2">Icon</th> */}
               <th className="p-2 text-center">Name</th>
               <th className="p-2 text-center">Description</th>
               <th className="p-2 text-center">Parent Category</th>
-              {/* <th className="p-2">Published</th> */}
-              {/* <th className="p-2">Status</th> */}
+
               <th className="p-2 text-center">Actions</th>
               <th className="p-2 text-center">Status</th>
             </tr>
@@ -284,20 +225,11 @@ const CategoryTable = () => {
           <tbody>
             {categories.map((category) => (
               <tr key={category.id} className="border-b">
-                {/* <td className="p-2 text-center">
-                  <img src={category.icon} className="mx-auto w-10 h-10 rounded-full" alt="icon" />
-                </td> */}
                 <td className="p-2 text-center">{category.name}</td>
                 <td className="p-2 text-center">{category.description}</td>
-                {/* <td className="p-2 text-center">{category.parentCategory}</td> */}
+
                 <td className="p-2 text-center">No Parent Category</td>
 
-                {/* <td className="p-2 text-center">
-                  <input type="checkbox" checked={category.published} readOnly />
-                </td> */}
-                {/* <td className="p-2 text-center">
-                  <span className="px-2 py-1 text-sm bg-green-200 text-green-800 rounded">{category.status}</span>
-                </td> */}
                 <td className="p-2 text-center">
                   <button
                     onClick={() => handleEditCategory(category)}
@@ -307,7 +239,6 @@ const CategoryTable = () => {
                   </button>
                 </td>
                 <td className="p-2 text-center">
-                  {/* <button onClick={() => handleDeleteCategory(category._id)} className="text-red-500">🗑️</button> */}
                   <button
                     onClick={() => handleToggle(category._id)}
                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -325,13 +256,6 @@ const CategoryTable = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      {/* <div className="flex justify-between items-center mt-4">
-        <button className="px-4 py-2 bg-gray-300 rounded">Previous</button>
-        <span>Page 1 of 1</span>
-        <button className="px-4 py-2 bg-gray-300 rounded">Next</button>
-      </div> */}
 
       <div className="flex flex-wrap justify-between items-center mt-4">
         <button className="px-4 py-2 bg-gray-300 rounded w-full sm:w-auto">

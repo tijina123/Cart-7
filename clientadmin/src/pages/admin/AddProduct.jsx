@@ -19,9 +19,13 @@ const AddProduct = () => {
 
   const validationSchema = Yup.object({
     productName: Yup.string().required("Product name is required"),
-    price: Yup.number().required("Price is required").positive("Must be a positive number"),
+    price: Yup.number()
+      .required("Price is required")
+      .positive("Must be a positive number"),
     salePrice: Yup.number().required("Must be a positive number"),
-    quantity: Yup.number().required("Quantity is required").integer("Must be an integer"),
+    quantity: Yup.number()
+      .required("Quantity is required")
+      .integer("Must be an integer"),
     description: Yup.string().required("Description is required"),
     category: Yup.string().required("Category is required"),
     images: Yup.array()
@@ -61,7 +65,9 @@ const AddProduct = () => {
     const { values } = useFormikContext();
 
     useEffect(() => {
-      const selectedCategory = categories.find(cat => cat._id === values.category);
+      const selectedCategory = categories.find(
+        (cat) => cat._id === values.category
+      );
       if (selectedCategory?.name.toLowerCase() === "dress") {
         setHasVariants(true);
       } else {
@@ -253,15 +259,16 @@ const AddProduct = () => {
           </div>
 
           {/* ✅ Show Variant Conditionally */}
-          {hasVariants && (
-            <Varient product={product} setProduct={setProduct} />
-          )}
+          {hasVariants && <Varient product={product} setProduct={setProduct} />}
 
           <ImageUploader />
 
           {/* Buttons */}
           <div className="flex justify-between mt-6">
-            <button type="button" className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+            <button
+              type="button"
+              className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
               Cancel
             </button>
             <button

@@ -8,13 +8,12 @@ const { Address } = require("../models/addressModel");
 
 const razorpay = require("../utils/razorpay.js"); // Import Razorpay instance
 
-
 const getLast7Days = () => {
   const dates = [];
   for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      dates.push(date.toISOString().split("T")[0]); // YYYY-MM-DD format
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    dates.push(date.toISOString().split("T")[0]); // YYYY-MM-DD format
   }
   return dates;
 };
@@ -22,84 +21,83 @@ const getLast7Days = () => {
 
 const salesByCategory = async (req, res) => {
   try {
-      const salesByCategory = await Order.aggregate([
-          { $unwind: "$orderItems" }, // Flatten order items
-          {
-              $lookup: {
-                  from: "products", // Match with Product collection
-                  localField: "orderItems.product",
-                  foreignField: "_id",
-                  as: "productDetails",
-              },
-          },
-          { $unwind: "$productDetails" },
-          {
-              $lookup: {
-                  from: "categories", // Match with Category collection
-                  localField: "productDetails.category",
-                  foreignField: "_id",
-                  as: "categoryDetails",
-              },
-          },
-          { $unwind: "$categoryDetails" },
-          {
-              $group: {
-                  _id: "$categoryDetails.name", // Group by category name
-                  totalSales: { $sum: "$orderItems.quantity" }, // Sum quantity sold
-              },
-          },
-          { $sort: { totalSales: -1 } }, // Sort by highest sales
-      ]);
+    const salesByCategory = await Order.aggregate([
+      { $unwind: "$orderItems" }, // Flatten order items
+      {
+        $lookup: {
+          from: "products", // Match with Product collection
+          localField: "orderItems.product",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      { $unwind: "$productDetails" },
+      {
+        $lookup: {
+          from: "categories", // Match with Category collection
+          localField: "productDetails.category",
+          foreignField: "_id",
+          as: "categoryDetails",
+        },
+      },
+      { $unwind: "$categoryDetails" },
+      {
+        $group: {
+          _id: "$categoryDetails.name", // Group by category name
+          totalSales: { $sum: "$orderItems.quantity" }, // Sum quantity sold
+        },
+      },
+      { $sort: { totalSales: -1 } }, // Sort by highest sales
+    ]);
 
-      // Format response
-      const labels = salesByCategory.map((item) => item._id);
-      const data = salesByCategory.map((item) => item.totalSales);
-console.log(labels,"===labels");
-console.log(data,"==data");
+    // Format response
+    const labels = salesByCategory.map((item) => item._id);
+    const data = salesByCategory.map((item) => item.totalSales);
+    console.log(labels, "===labels");
+    console.log(data, "==data");
 
-      res.json({ labels, data });
+    res.json({ labels, data });
   } catch (error) {
-      console.error("Error fetching sales by category:", error);
-      res.status(500).json({ error: "Server error" });
+    console.error("Error fetching sales by category:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 const orderForGraph = async (req, res) => {
   try {
-      const last7Days = getLast7Days();
-      const orders = await Order.aggregate([
-          {
-              $match: {
-                  createdAt: { $gte: new Date(last7Days[0] + "T00:00:00.000Z") },
-              },
-          },
-          {
-              $group: {
-                  _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                  count: { $sum: 1 },
-              },
-          },
-      ]);
+    const last7Days = getLast7Days();
+    const orders = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(last7Days[0] + "T00:00:00.000Z") },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-      // Convert MongoDB response into an object { "2025-03-21": 5, ... }
-      const orderMap = {};
-      orders.forEach((order) => {
-          orderMap[order._id] = order.count;
-      });
+    // Convert MongoDB response into an object { "2025-03-21": 5, ... }
+    const orderMap = {};
+    orders.forEach((order) => {
+      orderMap[order._id] = order.count;
+    });
 
-      // Map to last 7 days format
-      const data = last7Days.map((date) => orderMap[date] || 0);
+    // Map to last 7 days format
+    const data = last7Days.map((date) => orderMap[date] || 0);
 
-      res.json({ labels: last7Days, data });
+    res.json({ labels: last7Days, data });
   } catch (error) {
-      res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 // ✅ Check cart availability using aggregation
 const isproductAvailabe = async (req, res) => {
   try {
-
     const userId = req.userId;
 
     // Handle missing userId in params
@@ -136,7 +134,6 @@ const isproductAvailabe = async (req, res) => {
       },
     ]);
 
-
     if (userCart.length > 0) {
       return res.status(400).json({
         success: false,
@@ -145,14 +142,15 @@ const isproductAvailabe = async (req, res) => {
       });
     }
 
-    res.status(200).json({ success: true, message: "All products are available" });
-
+    res
+      .status(200)
+      .json({ success: true, message: "All products are available" });
   } catch (error) {
     console.log(error);
 
     res.status(500).json({ message: "Server error", error });
   }
-}
+};
 
 // ✅
 const getAllOrder = async (req, res) => {
@@ -160,8 +158,8 @@ const getAllOrder = async (req, res) => {
     const userId = req.userId;
 
     const orders = await Order.find()
-    .populate("user", "name phone") // Populate user fields (adjust as needed)
-    .populate("orderItems.product", "name sale_price images"); // Populate product fields
+      .populate("user", "name phone") // Populate user fields (adjust as needed)
+      .populate("orderItems.product", "name sale_price images"); // Populate product fields
     // Validation: Check if orders exist
     if (!orders || orders.length === 0) {
       return res.status(400).json({
@@ -173,7 +171,7 @@ const getAllOrder = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Orders retrieved successfully.",
-      orders
+      orders,
     });
   } catch (error) {
     res.status(500).json({
@@ -187,7 +185,6 @@ const getAllOrder = async (req, res) => {
 // ✅
 const getAllOrdersByUser = async (req, res) => {
   try {
-
     const userId = req.userId; // Assuming userId is extracted from auth middleware
 
     // Handle missing orderId in params
@@ -215,7 +212,7 @@ const getAllOrdersByUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Orders retrieved successfully.",
-      orders
+      orders,
     });
   } catch (error) {
     res.status(500).json({
@@ -226,10 +223,8 @@ const getAllOrdersByUser = async (req, res) => {
   }
 };
 
-
 //✅ Update Order Delivery Status
 const orderStatusUpdateOld = async (req, res) => {
-
   const { orderId } = req.params;
   const { deliveryStatus } = req.body;
 
@@ -241,8 +236,14 @@ const orderStatusUpdateOld = async (req, res) => {
   }
 
   const validStatuses = [
-    "Pending", "Processing", "Shipped", "Out for Delivery",
-    "Delivered", "Cancelled", "Returned", "Failed Delivery"
+    "Pending",
+    "Processing",
+    "Shipped",
+    "Out for Delivery",
+    "Delivered",
+    "Cancelled",
+    "Returned",
+    "Failed Delivery",
   ];
 
   try {
@@ -282,7 +283,6 @@ const orderStatusUpdateOld = async (req, res) => {
 // ✅
 const orderStatusUpdate = async (req, res) => {
   try {
-
     const { orderId } = req.params;
     const { deliveryStatus } = req.body;
 
@@ -294,10 +294,15 @@ const orderStatusUpdate = async (req, res) => {
     }
 
     const validStatuses = [
-      "Pending", "Processing", "Shipped", "Out for Delivery",
-      "Delivered", "Cancelled", "Returned", "Failed Delivery"
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled",
+      "Returned",
+      "Failed Delivery",
     ];
-
 
     // Validate orderId
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -318,16 +323,22 @@ const orderStatusUpdate = async (req, res) => {
     // Check if the status is being updated to "Returned"
     if (deliveryStatus === "Returned") {
       if (!order.deliveredAt) {
-        return res.status(400).json({ message: "Order has not been delivered yet" });
+        return res
+          .status(400)
+          .json({ message: "Order has not been delivered yet" });
       }
 
       // Calculate the difference between today and deliveredAt
       const deliveredDate = new Date(order.deliveredAt);
       const currentDate = new Date();
-      const diffInDays = Math.floor((currentDate - deliveredDate) / (1000 * 60 * 60 * 24));
+      const diffInDays = Math.floor(
+        (currentDate - deliveredDate) / (1000 * 60 * 60 * 24)
+      );
 
       if (diffInDays > 7) {
-        return res.status(400).json({ message: "Return period has expired (7 days limit)" });
+        return res
+          .status(400)
+          .json({ message: "Return period has expired (7 days limit)" });
       }
     }
 
@@ -348,19 +359,14 @@ const orderStatusUpdate = async (req, res) => {
   }
 };
 
-
-
 //✅ Create Order and Push to Shiprocket
 const createOrder = async (req, res) => {
-
-  // const validPaymentMethods = ["COD", "Credit Card", "Debit Card", "Net Banking", "UPI", "Wallet"];
-console.log("createOrder");
+  console.log("createOrder");
 
   try {
     const userId = req.userId;
 
-    // const { addressId, paymentMethod, currency = "INR" } = req.body;
-    const {paymentMethod, currency = "INR" } = req.body;
+    const { paymentMethod, currency = "INR" } = req.body;
 
     console.log("paymentMethod", paymentMethod);
 
@@ -368,12 +374,10 @@ console.log("createOrder");
       return res.status(400).json({ message: "Invalid user ID." });
     }
 
-    // const shippingAddress = await Address.findById('67f02aa2440ca60349af633e');
-
-    // const shippingAddress = await Address.find({ user: userId, isDefault: true });
-
-    const shippingAddress = await Address.find({ user: userId, isDefault: true });
-
+    const shippingAddress = await Address.find({
+      user: userId,
+      isDefault: true,
+    });
 
     // if (!address) {
     if (!shippingAddress) {
@@ -388,10 +392,6 @@ console.log("createOrder");
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    // if (!shippingAddress || Object.keys(shippingAddress).length === 0) {
-    //   return res.status(400).json({ message: "Shipping address is required" });
-    // }
-
     let totalAmount = 0;
     const createdOrders = [];
 
@@ -402,21 +402,24 @@ console.log("createOrder");
       if (!product) continue;
 
       if (product.stock < quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+        return res
+          .status(400)
+          .json({ message: `Insufficient stock for ${product.name}` });
       }
 
-      const orderPrice = (product.sale_price || product.product_price) * quantity;
+      const orderPrice =
+        (product.sale_price || product.product_price) * quantity;
       totalAmount += orderPrice;
 
       const newOrder = await Order.create({
         user: userId,
         orderItems: {
           product: product._id,
-          quantity
+          quantity,
         },
         shippingAddress,
         paymentMethod,
-        totalPrice: orderPrice
+        totalPrice: orderPrice,
       });
 
       // Reduce stock
@@ -430,7 +433,6 @@ console.log("createOrder");
 
     // Create one Razorpay order if payment is not COD
     if (paymentMethod !== "COD") {
-
       const options = {
         amount: totalAmount * 100, // in paise
         currency,
@@ -440,7 +442,9 @@ console.log("createOrder");
       razorpayOrder = await razorpay.orders.create(options);
 
       if (!razorpayOrder) {
-        return res.status(500).json({ message: "Razorpay order creation failed" });
+        return res
+          .status(500)
+          .json({ message: "Razorpay order creation failed" });
       }
 
       // Save razorpay ID to all orders
@@ -465,13 +469,13 @@ console.log("createOrder");
       totalAmount,
       razorpayOrder: razorpayOrder || null,
     });
-
   } catch (error) {
     console.error("Error placing order:", error);
-    return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
-
 
 // ✅
 const shiprocketWebhook = async (req, res) => {
@@ -495,10 +499,7 @@ const shiprocketWebhook = async (req, res) => {
     console.error("Webhook Error:", error);
     res.status(500).json({ message: "Webhook processing failed" });
   }
-}
-
-
-
+};
 
 module.exports = {
   createOrder,
@@ -508,6 +509,5 @@ module.exports = {
   orderStatusUpdate,
   getAllOrdersByUser,
   orderForGraph,
-  salesByCategory
+  salesByCategory,
 };
-
