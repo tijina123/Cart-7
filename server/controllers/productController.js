@@ -95,17 +95,21 @@ const getProductsByAgent = async (req, res) => {
 // ✅ Get filter products
 const getFilterProducts = async (req, res) => {
   try {
+    console.log("====getFilterProducts");
+    
     const { categoryId } = req.params; // Extract category ID from query params
 
     if (!categoryId) {
       return res.status(400).json({ message: "Category ID is required" });
     }
 
-    const product = await Product.find({ category: categoryId }).populate(
+    const products = await Product.find({ category: categoryId }).populate(
       "category"
     ); // Fetch products with category details
+
+    console.log("Filtered Products:", products); // Log the filtered products
     // Validation: Check if products exist
-    if (!product) {
+    if (!products) {
       return res.status(400).json({
         success: false,
         message: "No products found. Please add products first.",
@@ -114,7 +118,7 @@ const getFilterProducts = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully.",
-      product,
+      products,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -108,6 +108,11 @@ const UserService = () => {
     return response?.data;
   };
 
+  const putFilterProducts = async (productId) => {
+    const response = await axiosPrivate.get(`/product/filter/${productId}`);
+    return response?.data;
+  };
+
   return {
     getHomeProductsByCategory,
     getHomeProducts,
@@ -126,6 +131,7 @@ const UserService = () => {
     getHomeCategory,
     getAddress,
     putSelectAddress,
+    putFilterProducts
   };
 };
 

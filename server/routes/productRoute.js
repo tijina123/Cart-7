@@ -8,7 +8,7 @@ const productController = require("../controllers/productController")
 
 // Product Management
 router.get("/",productController.getProducts);//→ Get all products
-router.get("/filter/:id",productController.getFilterProducts);//→ Filter products
+router.get("/filter/:categoryId",productController.getFilterProducts);//→ Filter products
 router.get("/by-category",productController.getProductsByCategory);// GET all products grouped by category
 router.get("/:id",productController.getSingleProduct);//→ Get a single product by ID
 router.post("/admin",checkAuth, upload.array("images", 5), productController.addProduct); //→ Create a new product (admin)

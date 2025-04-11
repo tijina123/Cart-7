@@ -11,7 +11,7 @@ import { FiLogOut } from "react-icons/fi";
 const UserNavbar = () => {
   const { auth } = useAuth();
 
-  const { getHomeCategory } = UserService();
+  const { getHomeCategory,putFilterProducts } = UserService();
 
   const [category, setCategory] = useState([]);
 
@@ -34,8 +34,40 @@ const UserNavbar = () => {
   };
   const OnHandleLogout = async () => {
     localStorage.clear();
+};
 
 
+const handleCategoryClick = async (data) => {
+  try {
+console.log("category data",data);
+
+    // const response = await fetch(`/your-api-endpoint/${data.id}`, {
+    //   method: 'GET', // or 'POST' depending on your API
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // });
+
+    // if (!response.ok) throw new Error('Network response was not ok');
+
+    const response = await putFilterProducts(data?._id);
+
+    console.log("response==========", response);
+    
+
+
+
+    // Assuming `result.success` indicates a successful API call
+    if (true) {
+      document
+        .querySelector(".filter-products")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      console.error("API did not return success:", result);
+    }
+  } catch (error) {
+    console.error("API call failed:", error);
+  }
 };
 
   return (
@@ -188,7 +220,7 @@ const UserNavbar = () => {
                   {/* </a> */}
                 </Link>
                 )}
-                
+
               </div>
             </div>
             {/* End .header-right */}
@@ -235,11 +267,7 @@ const UserNavbar = () => {
                         <li>
                           <a>
                             <button
-                              onClick={() =>
-                                document
-                                  .querySelector(".filter-products")
-                                  ?.scrollIntoView({ behavior: "smooth" })
-                              }
+                              onClick={() => handleCategoryClick(data)}
                             >
                               {data?.name}
                             </button>{" "}
